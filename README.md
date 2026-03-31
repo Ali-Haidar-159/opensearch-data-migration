@@ -20,6 +20,15 @@ This project:
 - Python 3.9+
 - OpenSearch and PostgreSQL (local or dockerized)
 
+## Clone and Install
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Ali-Haidar-159/opensearch-data-migration.git
+cd opensearch-data-migration
+```
+
 Install Python dependencies:
 
 ```bash
