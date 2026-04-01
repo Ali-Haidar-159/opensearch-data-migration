@@ -5,14 +5,15 @@ A minimal, production-ready pipeline that migrates user and activity documents f
 This project:
 - Creates relational tables for `users`, `address`, and `activity`
 - Reads documents from OpenSearch indices (`user`, `activity`)
-- Loads data into PostgreSQL with basic idempotency
+- Loads data into PostgreSQL with basic idempotency for `users` and `activity`
 
 ## Project Structure
 
-- `connection.py` - OpenSearch and PostgreSQL connection helpers
-- `create_tables.py` - SQL schema creation
-- `migrate.py` - Data extraction and load logic
-- `main.py` - Orchestrates table creation, migration, and verification
+- `config/db/connection.py` - OpenSearch and PostgreSQL connection helpers
+- `config/db/create_tables.py` - SQL schema creation
+- `config/db/models.py` - SQLAlchemy table definitions
+- `service/migrate.py` - Data extraction and load logic
+- `main.py` - Orchestrates table creation and migration
 - `docker-compose.yml` - Local OpenSearch and PostgreSQL services
 
 ## Requirements
@@ -60,6 +61,8 @@ POSTGRES_PASSWORD=admin
 docker-compose up -d
 ```
 
+This starts OpenSearch, OpenSearch Dashboards, and PostgreSQL from `docker-compose.yml`.
+
 2. Run the migration:
 
 ```bash
@@ -69,7 +72,6 @@ python main.py
 This will:
 - Create tables (if they do not exist)
 - Migrate data from OpenSearch to PostgreSQL
-- Print final row counts
 
 ## OpenSearch Index Expectations
 
@@ -112,8 +114,10 @@ Example documents:
 ## Notes
 
 - IDs are stored as strings in PostgreSQL to match OpenSearch documents.
-- The migration uses `ON CONFLICT (id) DO NOTHING` to avoid duplicates.
-- SSL verification is disabled for OpenSearch by default in `connection.py`.
+- The migration uses `ON CONFLICT (id) DO NOTHING` to avoid duplicates for `users` and `activity`.
+- The `address` table stores one row per user per activity location found, and does not de-duplicate.
+- OpenSearch connections use SSL (`use_ssl=True`) with certificate verification disabled by default in `config/db/connection.py`.
+- OpenSearch scroll size is 100 with a 2 minute scroll window (`service/migrate.py`).
 
 ## Troubleshooting
 
