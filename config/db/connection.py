@@ -1,7 +1,7 @@
 import os
 from opensearchpy import OpenSearch
-import psycopg2
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
 load_dotenv()
 
@@ -20,11 +20,12 @@ def get_opensearch_client():
         ssl_show_warn=False
     )
 
-def get_postgres_conn():
-    return psycopg2.connect(
-        host=os.getenv("POSTGRES_HOST"),
-        port=os.getenv("POSTGRES_PORT"),
-        dbname=os.getenv("POSTGRES_DB"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD")
-    )
+def get_postgres_engine():
+    host = os.getenv("POSTGRES_HOST")
+    port = os.getenv("POSTGRES_PORT")
+    db   = os.getenv("POSTGRES_DB")
+    user = os.getenv("POSTGRES_USER")
+    pwd  = os.getenv("POSTGRES_PASSWORD")
+
+    url = f"postgresql+psycopg://{user}:{pwd}@{host}:{port}/{db}"
+    return create_engine(url, pool_pre_ping=True)
